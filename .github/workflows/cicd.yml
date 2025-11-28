@@ -19,7 +19,7 @@ jobs:
           script: |
             set -e
 
-            LOG_FILE="/var/log/build_log.log"
+            LOG_FILE="$HOME/build_log.log"
             echo "=== Build started at $(date) ===" > $LOG_FILE
 
             log() {
