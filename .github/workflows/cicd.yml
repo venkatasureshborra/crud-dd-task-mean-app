@@ -14,72 +14,108 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
-
-          # These env vars will be available INSIDE the SSH session
           envs: DOCKER_USERNAME,DOCKER_PASSWORD
 
           script: |
-            set -e  # stop on first error
+            set -e
 
-            # 1. Variables
+            LOG_FILE="/var/log/build_log.log"
+            echo "=== Build started at $(date) ===" > $LOG_FILE
+
+            log() {
+              echo "$@" >> $LOG_FILE
+            }
+
+            safe_run() {
+              "$@" >> $LOG_FILE 2>&1
+            }
+
             REPO_URL="https://github.com/${{ github.repository }}.git"
-            APP_DIR="$HOME/crud-dd-task-mean-app"   # folder name 
+            APP_DIR="$HOME/crud-dd-task-mean-app"
 
             echo "Using app directory: $APP_DIR"
 
-            # 2. Clone or update repo
             if [ ! -d "$APP_DIR/.git" ]; then
               echo "Cloning repository..."
-              git clone "$REPO_URL" "$APP_DIR"
+              log "[Git Clone]"
+              safe_run git clone "$REPO_URL" "$APP_DIR"
             else
               echo "Pulling latest changes..."
+              log "[Git Pull]"
               cd "$APP_DIR"
-              git pull origin main
+              safe_run git pull origin main
             fi
 
             cd "$APP_DIR"
 
-            # 3. Docker login
             echo "Logging in to Docker Hub..."
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            log "[Docker Login]"
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin >> $LOG_FILE 2>&1
 
-            # 4. Build & push images (on VM)
             echo "Building Backend image..."
-            docker build -t "$DOCKER_USERNAME/crud-backend:latest" ./backend
-            docker push "$DOCKER_USERNAME/crud-backend:latest"
+            log "[Backend Build]"
+            if ! safe_run docker build -t "$DOCKER_USERNAME/crud-backend:latest" ./backend; then
+              echo "❗Backend build failed — check logs in /var/log/build_log.log"
+              exit 1
+            fi
+            echo "Finished."
 
             echo "Building Frontend image..."
-            docker build -t "$DOCKER_USERNAME/crud-frontend:latest" ./frontend
-            docker push "$DOCKER_USERNAME/crud-frontend:latest"
+            log "[Frontend Build]"
+            if ! safe_run docker build -t "$DOCKER_USERNAME/crud-frontend:latest" ./frontend; then
+              echo "❗Frontend build failed — check logs in /var/log/build_log.log"
+              exit 1
+            fi
+            echo "Finished."
 
-            # 5. Deploy using docker-compose.yml present on the VM
+            echo "Pushing images to DockerHub..."
+            log "[Docker Push]"
+            safe_run docker push "$DOCKER_USERNAME/crud-backend:latest"
+            safe_run docker push "$DOCKER_USERNAME/crud-frontend:latest"
+            echo "Finished."
+
             echo "Deploying with docker-compose..."
+            log "[Container Deploy]"
 
-            # Stop existing containers if compose file exists
             if [ -f docker-compose.yml ]; then
               echo "Stopping existing containers..."
-              docker-compose down || true
+              safe_run docker-compose down || true
             fi
 
-            echo "Pulling latest images from Docker Hub..."
-            docker compose pull || docker-compose pull
+            echo "Pulling latest images..."
+            safe_run docker compose pull || safe_run docker-compose pull
 
             echo "Starting services..."
-            docker-compose up -d
+            if ! safe_run docker-compose up -d; then
+              echo "❗Deployment failed — check logs in /var/log/build_log.log"
+              exit 1
+            fi
+            echo "Finished."
 
-             echo "Cleaning old unused images..."
-            docker image prune -f
+            echo "Cleaning old unused images..."
+            log "[Cleanup Images]"
+            safe_run docker image prune -f
+            echo "Finished."
 
             echo "Removing untagged <none> images..."
             if docker images | grep -q "<none>"; then
-              docker rmi $(docker images -f "dangling=true" -q) -f || true
+              safe_run docker rmi $(docker images -f "dangling=true" -q) -f || true
             else
               echo "No dangling images found."
             fi
+            echo "Finished."
 
             echo "Cleaning unused containers & volumes..."
-            docker container prune -f
-            docker volume prune -f
+            log "[Cleanup Containers]"
+            safe_run docker container prune -f
+            safe_run docker volume prune -f
+            echo "Finished."
+
+            echo "All tasks completed."
+            log "=== Build Finished Successfully at $(date) ==="
+            
+            # SUCCESS → CLEAR LOG
+            echo "" > $LOG_FILE
 
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
