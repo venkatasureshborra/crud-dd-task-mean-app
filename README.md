@@ -27,7 +27,6 @@ You can modify the `src/app/services/tutorial.service.ts` file to adjust how the
 Navigate to `http://localhost:8081/`
 
 
-# Deployment Of this Application in Virtaul Machine using Docker Containers
 # MEAN Stack Application - Containerized Deployment
 
 A full-stack CRUD application built with MongoDB, Express.js, Angular, and Node.js, containerized with Docker and deployed with CI/CD automation.
@@ -274,38 +273,13 @@ mean-stack-deployment/
 ├── setup-vm.sh                     # VM setup script
 └── README.md
 ```
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-**Backend (.env)**
-```env
-NODE_ENV=production
-MONGO_URI=mongodb://admin:password@mongodb:27017/meanapp?authSource=admin
-PORT=3000
-```
-
-**Frontend (environment.ts)**
-```typescript
-export const environment = {
-  production: true,
-  apiUrl: '/api'
-};
-```
-
 ### MongoDB Configuration
 
 Default credentials (change in production):
 - Username: `admin`
-- Password: `password123`
-- Database: `meanapp`
+- Password: `admin123`
+- Database: `dd_db`
 - Port: `27017`
-
-### Nginx Configuration
-
-- Frontend: Port 4200 → 80
-- Backend API: `/api/*` → `backend:3000`
 
 ## 🐛 Troubleshooting
 
@@ -395,7 +369,7 @@ sudo tail -f /var/log/nginx/error.log
 
 ## 👤 Author
 
-**Your Name**
+**Venkata Suresh**
 - GitHub: [@YOUR_USERNAME](https://github.com/venkatasureshborra)
 - LinkedIn: [Your Profile](https://linkedin.com/in/venkatasureshborra)
 
@@ -410,10 +384,8 @@ sudo tail -f /var/log/nginx/error.log
 ---
 
 
-**Live Demo:** http://YOUR_VM_IP
+**url:** http://VM_IP
+**Docker Hub:** https://hub.docker.com/u/venkat14489
 
-**Docker Hub:** https://hub.docker.com/u/YOUR_USERNAME
-
-**Last Updated:** November 2025
 
 
