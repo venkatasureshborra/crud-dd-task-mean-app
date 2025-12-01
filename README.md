@@ -370,8 +370,8 @@ sudo tail -f /var/log/nginx/error.log
 ## 👤 Author
 
 **Venkata Suresh**
-- GitHub: [@YOUR_USERNAME](https://github.com/venkatasureshborra)
-- LinkedIn: [Your Profile](https://linkedin.com/in/venkatasureshborra)
+- [GitHub](https://github.com/venkatasureshborra)
+- [LinkedIn](https://linkedin.com/in/venkatasureshborra)
 
 ## 🙏 Acknowledgments
 
@@ -384,8 +384,8 @@ sudo tail -f /var/log/nginx/error.log
 ---
 
 
-**url:** http://VM_IP
-**Docker Hub:** https://hub.docker.com/u/venkat14489
+- **url:** http://VM_IP
+- **Docker Hub:** https://hub.docker.com/u/venkat14489
 
 
 
