@@ -55,7 +55,7 @@ jobs:
             echo "Building Backend image..."
             log "[Backend Build]"
             if ! safe_run docker build -t "$DOCKER_USERNAME/crud-backend:latest" ./backend; then
-              echo "❗Backend build failed — check logs in /var/log/build_log.log"
+              echo "Backend build failed — check logs in /var/log/build_log.log"
               exit 1
             fi
             echo "Finished."
@@ -63,7 +63,7 @@ jobs:
             echo "Building Frontend image..."
             log "[Frontend Build]"
             if ! safe_run docker build -t "$DOCKER_USERNAME/crud-frontend:latest" ./frontend; then
-              echo "❗Frontend build failed — check logs in /var/log/build_log.log"
+              echo "Frontend build failed — check logs in /var/log/build_log.log"
               exit 1
             fi
             echo "Finished."
@@ -83,11 +83,11 @@ jobs:
             fi
 
             echo "Pulling latest images..."
-            safe_run docker compose pull || safe_run docker-compose pull
+            safe_run docker-compose pull
 
             echo "Starting services..."
             if ! safe_run docker-compose up -d; then
-              echo "❗Deployment failed — check logs in /var/log/build_log.log"
+              echo "Deployment failed — check logs in /var/log/build_log.log"
               exit 1
             fi
             echo "Finished."
