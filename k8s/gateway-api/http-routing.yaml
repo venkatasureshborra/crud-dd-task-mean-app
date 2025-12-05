@@ -1,0 +1,23 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mean-router
+  namespace: mean-stack
+spec:
+  parentRefs:
+    - name: mean-gateway
+  rules:
+    - matches:
+      - path:
+          type: PathPrefix
+          value: /
+      backendRefs:
+      - name: frontend-service
+        port: 8081
+    - matches:
+      - path:
+         type: PathPrefix
+         value: /api
+      backendRefs:
+        - name: backend-service
+          port: 8080
